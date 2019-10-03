@@ -485,16 +485,6 @@ if __name__=='__main__':
 
 
 
-sma_pred_15 = getStockData.SMA(predict_pos,15,1)
-# ma_pre = getStockData.MA(predict_pos,10)
-plt.plot(sma_pred_15,label='sma_pred_15')
-
-five = [5] *len(predict_pos)
-plt.plot(five)
-eighty = [85] * len(predict_pos)
-plt.plot(eighty)
-
-
 
 
 
