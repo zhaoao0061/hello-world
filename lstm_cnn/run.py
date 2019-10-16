@@ -14,27 +14,10 @@ from keras.models import load_model
 import keras.backend.tensorflow_backend as KTF
 import tensorflow as tf
 from keras import optimizers,losses
+import lstm_cnn.Evaluate as eva
 
 KTF.set_session(tf.Session(config=tf.ConfigProto(device_count={'cpu':0})))
 
-def plot_results_multiple(predicted_data, true_data, prediction_len):
-	fig = plt.figure(facecolor='white')
-	ax = fig.add_subplot(111)
-	ax.plot(true_data, label = 'True Data')
-
-	for i, data in enumerate(predicted_data):
-		padding = [None for p in range(i * prediction_len)]
-		plt.plot(padding + data, label = 'Prediction')
-		plt.legend()
-	plt.show()
-
-def plot_results(predicted_data, true_data, filename):
-	fig = plt.figure(facecolor='white')
-	ax = fig.add_subplot(111)
-	ax.plot(true_data, label = 'True Data')
-	plt.plot(predicted_data, label='Prediction')
-	plt.legend()
-	plt.show()
 def back_price0(nor_data,ori_data):
 	back_nor_data = []
 	for (y,oridata) in zip(nor_data,ori_data):
@@ -79,8 +62,8 @@ def pred_test(code,is_save=False,index_num=0,sum_epoch=0,pos_range=0):
 	target_len = len(y_pos)
 	pred = predict_pos[:target_len]
 	true = y_pos
-	wmae = WMAE(predict_pos,true)
-	eval_result = evalute_result(predict_pos,y_pos)
+	wmae = eva.WMAE(predict_pos,true)
+	eval_result = eva.evalute_result(predict_pos,y_pos)
 
 
 	if is_save:
@@ -89,120 +72,7 @@ def pred_test(code,is_save=False,index_num=0,sum_epoch=0,pos_range=0):
 		eval_save.write(result_sum)
 		eval_save.close()
 
-def WMAE(pred,true):
-	# yibai = np.array(range(0,100))
-	# yibai_2 = np.array(yibai)/50-1
-	# c = 0.01
-	# wy = np.log((1 + yibai_2 + c) / (1 - yibai_2 + c))
-	# plt.plot(wy)
-	pred = np.array(pred)/50-1
-	true = np.array(true)/50-1
-	c=0.1
-	Pred = 0.5 * np.log((1 + pred + c) / (1 - pred + c))
-	Target = 0.5* np.log((1 + true +c) / (1- true + c))
-	wab = np.abs(Pred-Target)
-	wsq = np.square(Pred-Target)
-	wmae = np.sum(wab)/len(wab)
-	return wmae
 
-def Turn_error(pred,target):
-	sum_dif = 0
-	n = 0.00000001
-	dif = 0
-	for i in range(len(target)):
-		if pred[i] == 0:
-			dif = target[i] - pred[i]
-			sum_dif += dif
-			n += 1
-	mean_error = sum_dif / n
-	print('mean_error:', mean_error)
-
-def evalute_result(pred,true):
-	sum_div = 0
-	n = 0.00000001
-	div=0
-	for i in range(len(true)):
-		if pred[i] == 0:
-			div = true[i] - pred[i]
-			sum_div += div
-			n += 1
-	mean_error = sum_div / n
-	print('mean_error:',mean_error)
-
-	return mean_error
-
-def data_save(train_model,file_name='',pos_range = 0.2):
-	stockCode = getStockData.getStockCode()
-	stockCode = stockCode
-	(result, no_pos), (cls_train, pos_train) = getStockData.dataFrameToTrain(stockCode[0],pos_range=pos_range)
-	for i in range(1, len(stockCode)):
-		try:
-			(result_T, no_pos_T), (cls_train_T, pos_train_T) = getStockData.dataFrameToTrain(stockCode[i],pos_range=pos_range)
-		except:
-			print('dddd')
-			continue
-		if result_T == []:
-			continue
-		for ctr in cls_train:
-			cls_train[ctr] = np.r_[cls_train[ctr], cls_train_T[ctr]]
-			pos_train[ctr] = np.r_[pos_train[ctr], pos_train_T[ctr]]
-		result = np.r_[result, result_T]
-		no_pos = np.r_[no_pos, no_pos_T]
-	if train_model == 'cls':
-		np.savez(file_name+'train_z.npz',
-				 train_x=cls_train['train_x'],
-				 train_y=cls_train['train_y'],
-				 test_x=cls_train['test_x'],
-				 test_y=cls_train['test_y'],
-				 test_x_ori=cls_train['test_x_ori'],
-				 test_y_ori=cls_train['test_y_ori'],
-				 train_x_ori=cls_train['train_x_ori'],
-				 train_y_ori=cls_train['train_y_ori'],
-				 )
-	elif train_mode == 'pos':
-		np.savez(file_name+'train_pos_z.npz',
-				 train_x=pos_train['train_x'],
-				 train_y=pos_train['train_y'],
-				 test_x=pos_train['test_x'],
-				 test_y=pos_train['test_y'],
-				 test_x_ori=pos_train['test_x_ori'],
-				 test_y_ori=pos_train['test_y_ori'],
-				 train_x_ori=pos_train['train_x_ori'],
-				 train_y_ori=pos_train['train_y_ori'],
-				 )
-	return (result, no_pos), (cls_train, pos_train)
-
-
-def map_to_train(train_mode):
-	if train_mode == 'cls':
-		X_train = cls_train['train_x']
-		y_train = cls_train['train_y']
-		X_test = cls_train['test_x']
-		y_test = cls_train['test_y']
-		test_x_ori = cls_train['test_x_ori']
-		test_y_ori = cls_train['test_y_ori']
-		train_x_ori = cls_train['train_x_ori']
-		train_y_ori = cls_train['train_y_ori']
-	elif train_mode == 'pos':
-		X_train = pos_train['train_x']
-		y_train = pos_train['train_y']
-		X_test = pos_train['test_x']
-		y_test = pos_train['test_y']
-		test_x_ori = pos_train['test_x_ori']
-		test_y_ori = pos_train['test_y_ori']
-		train_x_ori = pos_train['train_x_ori']
-		train_y_ori = pos_train['train_y_ori']
-
-	print('X_train shape:', X_train.shape)  # (3709L, 50L, 1L)
-	print('y_train shape:', y_train.shape)  # (3709L,)
-	print('X_test shape:', X_test.shape)  # (412L, 50L, 1L)
-	print('y_test shape:', y_test.shape)  # (412L,)
-	print('test_x_ori shape:', test_x_ori.shape)  # (3709L, 50L, 1L)
-	print('test_y_ori shape:', test_y_ori.shape)  # (3709L,)
-	print('train_x_ori shape:', train_x_ori.shape)  # (412L, 50L, 1L)
-	print('train_y_ori shape:', train_y_ori.shape)  # (412L,)
-
-	return (X_train,y_train,X_test,y_test),(test_x_ori,test_y_ori,train_x_ori,train_y_ori)
 
 
 

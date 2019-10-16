@@ -41,8 +41,8 @@ def data(
     path = 'data/'
     stockCode = dt.getStockCode()  # 获取训练集股票代码，具体哪个代码去函数里设置
 
-    file_name = path + 'pos_f5'  # pos_40_train_z.npz
-    if False:  # 保存或加载数据，True为在线获取数据，处理后保存于path目录下 。False为直接加载之前存储的数据。
+    file_name = path + 'pos_f5_len20'  # pos_40_train_z.npz
+    if True:  # 保存或加载数据，True为在线获取数据，处理后保存于path目录下 。False为直接加载之前存储的数据。
         result, train = dt.data_save(stockCode, seqlen=nsample, file_name=file_name)
     else:  # 加载文件
         train = np.load(file_name + 'train_len' + str(nsample) + '.npz')
@@ -52,24 +52,7 @@ def data(
     return X_train,y_train
 
 
-class RNN(nn.Module):
-    def __init__(self):
-        super(RNN, self).__init__()  # 面向对象中的继承
-        seq_lenth = 5
-        self.lstm = nn.LSTM(5, 6, num_layers=2)  # 输入数据2个特征维度，6个隐藏层维度，2个LSTM串联，第二个LSTM接收第一个的计算结果
-        # self.out = nn.Linear(6 * 20, 1)  # 线性拟合，接收数据的维度为6，输出数据的维度为1
-        self.out = nn.Linear(6 * seq_lenth, 1)  # 线性拟合，接收数据的维度为6，输出数据的维度为1
 
-    def forward(self, x):
-        # test = x.view(-1,20*6)
-        x1, _ = self.lstm(x)
-        # reshape_x1 = x1.view(-1, 20 * 6)
-        seq_lenth = 5
-        reshape_x1 = x1.view(-1, seq_lenth * 6)
-        # a, b, c = x1.shape
-        out = self.out(reshape_x1)  # 因为线性层输入的是个二维数据，所以此处应该将lstm输出的三维数据x1调整成二维数据，最后的特征维度不能变
-        out1 = out.view(-1)  # 因为是循环神经网络，最后的时候要把二维的out调整成三维数据，下一次循环使用
-        return out1
 
     # return out1
 
@@ -77,7 +60,7 @@ class RNN(nn.Module):
 if __name__ == '__main__':
     start = 0.
     # ntotal = 1000
-    nsample = 5  # 以100个等间隔的时间步长采样
+    nsample = 20  # 以100个等间隔的时间步长采样
 
     device = torch.device('cuda:' + str(args.gpu)
                           if torch.cuda.is_available() else 'cpu')
@@ -91,7 +74,7 @@ if __name__ == '__main__':
     optimizer = optim.Adam(rnn.parameters(), lr=0.001)
     loss_func = nn.MSELoss()
 
-    epoch = 10
+    epoch = 20
     batch_size = 200
 
     for i in range(epoch):
