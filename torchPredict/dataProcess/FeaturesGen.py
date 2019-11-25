@@ -66,8 +66,13 @@ def get_train_data(path):
 	# (result, no_pos), (cls_train, pos_train) = getStockData.dataFrameToTrain('002594')
 	else:
 		file_name = 'pos_' + str(pos_range) + '_'
-		if train_mode == CLS: cls_train = np.load(path + file_name + 'train_z.npz')
-		if train_mode == POS: pos_train = np.load(path + file_name + 'train_pos_z.npz')
-	(X_train, y_train, X_test, y_test), \
-	(test_x_ori, test_y_ori, train_x_ori, train_y_ori) \
-		= map_to_train(train_mode)
+		if train_mode == CLS:
+			cls_train = np.load(path + file_name + 'train_z.npz')
+			(X_train, y_train, X_test, y_test), \
+			(test_x_ori, test_y_ori, train_x_ori, train_y_ori) \
+				= map_to_train_cls(cls_train)
+		if train_mode == POS:
+			pos_train = np.load(path + file_name + 'train_pos_z.npz')
+			(X_train, y_train, X_test, y_test), \
+			(test_x_ori, test_y_ori, train_x_ori, train_y_ori) \
+				= map_to_train_pos(pos_train)
