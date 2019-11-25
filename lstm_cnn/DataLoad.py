@@ -49,8 +49,9 @@ class DataLoad():
 		return (result, no_pos), (cls_train, pos_train)
 
 
-	def map_to_train(train_mode):
+	def map_to_train(train_mode,cp_train):
 		if train_mode == 'cls':
+			cls_train = cp_train
 			X_train = cls_train['train_x']
 			y_train = cls_train['train_y']
 			X_test = cls_train['test_x']
@@ -60,6 +61,7 @@ class DataLoad():
 			train_x_ori = cls_train['train_x_ori']
 			train_y_ori = cls_train['train_y_ori']
 		elif train_mode == 'pos':
+			pos_train = cp_train
 			X_train = pos_train['train_x']
 			y_train = pos_train['train_y']
 			X_test = pos_train['test_x']

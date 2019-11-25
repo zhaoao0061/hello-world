@@ -15,6 +15,7 @@ import keras.backend.tensorflow_backend as KTF
 import tensorflow as tf
 from keras import optimizers,losses
 import lstm_cnn.Evaluate as eva
+import lstm_cnn.DataLoad as dtload
 
 KTF.set_session(tf.Session(config=tf.ConfigProto(device_count={'cpu':0})))
 
@@ -90,9 +91,10 @@ if __name__=='__main__':
 	#nor_result = result
 	path = 'datafiles/'
 	pos_range=0.4
-	if False:
+	if True:
+		dataLoad = dtload.DataLoad();
 		file_name= path + 'pos_'+str(pos_range)+'_'  #pos_40_train_z.npz
-		(result, no_pos), (cls_train, pos_train)=data_save(train_mode,file_name=file_name,pos_range=pos_range)
+		(result, no_pos), (cls_train, pos_train)= dataLoad.data_save(train_mode,file_name=file_name,pos_range=pos_range)
 		#filename='pos_40_' : 转折幅度为40%的训练数据
 		#(result, no_pos), (cls_train, pos_train) = getStockData.dataFrameToTrain('002594')
 	else:

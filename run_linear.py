@@ -31,6 +31,7 @@ def plot_results(predicted_data, true_data, filename):
 	plt.plot(predicted_data, label='Prediction')
 	plt.legend()
 	plt.show()
+
 def back_price0(nor_data,ori_data):
 	back_nor_data = []
 	for (y,oridata) in zip(nor_data,ori_data):
@@ -284,9 +285,10 @@ if __name__=='__main__':
 	global_start_time = time.time()
 	epochs = 17
 	seq_len = 100
+
+	model_path = 'model_linear/'
 	POS = 'pos'
 	CLS = 'cls'
-	model_path = 'model_linear/'
 	train_mode = POS
 
 
