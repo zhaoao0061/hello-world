@@ -218,3 +218,42 @@ def get_train(result):#获取训练与测试数据
 				"train_y_ori": train_y_cls_ori}
 
 	return train_data
+
+
+
+# 返回一个列表，为训练集的股票代码。
+def getStockCode():
+	code = []
+	for i in range(600000,600050):
+		code.append(str(i))
+	remove_list = ['600026'] #, '600053', '600083', '600090', '600132'
+	for remove_code in remove_list:
+		code.remove(remove_code)
+	code.remove('600001')
+	code.remove('600002')
+	code.remove('600003')
+	code.remove('600005')
+	code.remove('600013')
+	code.remove('600014')
+	code.remove('600023')
+	code.remove('600024')
+	code.remove('600025')
+	code.remove('600032')
+	code.remove('600034')
+	code.remove('600040')
+	code.remove('600041')
+	code.remove('600042')
+	code.remove('600043')
+	code.remove('600044')
+	code.remove('600045')
+	code.remove('600046')
+	code.remove('600047')
+	code.remove('600049')
+	# code.remove('600065')
+	# code.remove('600074')
+	# code.remove('600087')
+	# code.remove('600091')
+	# code.remove('600102')
+	# code.remove('600124')
+
+	return code

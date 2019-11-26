@@ -298,7 +298,7 @@ if __name__=='__main__':
 	path = 'datafiles/'
 
 	pos_range=0.2
-	if False:
+	if True:
 		file_name= path + 'pos_'+str(pos_range)+'_'  #pos_40_train_z.npz
 		(result, no_pos), (cls_train, pos_train)=data_save(train_mode,file_name=file_name,pos_range=pos_range)
 		#filename='pos_40_' : 转折幅度为40%的训练数据

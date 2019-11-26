@@ -1,4 +1,8 @@
+'''
 
+数据归一化相关数据处理
+
+'''
 
 
 def normalise_windows(window_data):
