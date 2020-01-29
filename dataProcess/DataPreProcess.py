@@ -14,7 +14,7 @@ import dataProcess.ScaleForStock as Scale
 
 
 
-def get_test_data(code = '002594', seq_len=100, pos_range=0.15, ktype='W'):#获取一只股票的历史数据进行测试
+def get_test_data(code, seq_len, pos_range, ktype):#获取一只股票的历史数据进行测试
 	priceWeek = ts.get_k_data(code, ktype = ktype)
 	year = int(priceWeek['date'][0][:4])
 	low = priceWeek['low'][0:].tolist()
@@ -26,7 +26,7 @@ def get_test_data(code = '002594', seq_len=100, pos_range=0.15, ktype='W'):#获�
 	K8 = Indicator.ZT838(close, N1=10, N2=10)  # 计算指标数值K8
 	position = Indicator.FLATZIG(close, pos_range)
 	bdcz = Indicator.KDJ(close,low,high).tolist()
-	bdcz_99 = Indicator.KDJ(close,low,high,99).tolist()
+	bdcz_99 = Indicator.KDJ(close, low, high, 100, 15, 5).tolist()
 
 	# features : close, nor_vol, K8;
 	# Label: close; position
@@ -55,7 +55,7 @@ def get_test_data(code = '002594', seq_len=100, pos_range=0.15, ktype='W'):#获�
 	pos = np.array(position)
 
 	for index in range(len(close) - sequence_length + 1):
-		result_temp.append(close[index:index + sequence_length])#+1:加入最新的一天，以便预测。 0:100
+		result_temp.append(close[index:index + sequence_length])
 		result_temp.append(nor_vol[index:index + sequence_length])
 		result_temp.append(K8[index:index + sequence_length])
 		result_temp.append(bdcz[index:index + sequence_length])
@@ -275,3 +275,5 @@ def getStockCode():
 	# code.remove('600124')
 
 	return code
+
+get_test_data(code='600011',seq_len=100,pos_range=0.2,ktype='D')

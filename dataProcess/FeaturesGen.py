@@ -13,16 +13,16 @@ pos_range = 0.2
 train_model = POS
 
 
-def map_to_train_cls(cls_train):
+def map_to_train(train_dict):
 
-	X_train = cls_train['train_x']
-	y_train = cls_train['train_y']
-	X_test = cls_train['test_x']
-	y_test = cls_train['test_y']
-	test_x_ori = cls_train['test_x_ori']
-	test_y_ori = cls_train['test_y_ori']
-	train_x_ori = cls_train['train_x_ori']
-	train_y_ori = cls_train['train_y_ori']
+	X_train = train_dict['train_x']
+	y_train = train_dict['train_y']
+	X_test = train_dict['test_x']
+	y_test = train_dict['test_y']
+	test_x_ori = train_dict['test_x_ori']
+	test_y_ori = train_dict['test_y_ori']
+	train_x_ori = train_dict['train_x_ori']
+	train_y_ori = train_dict['train_y_ori']
 
 	print('X_train shape:', X_train.shape)  # (3709L, 50L, 1L)
 	print('y_train shape:', y_train.shape)  # (3709L,)
@@ -36,31 +36,8 @@ def map_to_train_cls(cls_train):
 	return (X_train,y_train,X_test,y_test),(test_x_ori,test_y_ori,train_x_ori,train_y_ori)
 
 
-def map_to_train_pos(pos_train):
-
-	X_train = pos_train['train_x']
-	y_train = pos_train['train_y']
-	X_test = pos_train['test_x']
-	y_test = pos_train['test_y']
-	test_x_ori = pos_train['test_x_ori']
-	test_y_ori = pos_train['test_y_ori']
-	train_x_ori = pos_train['train_x_ori']
-	train_y_ori = pos_train['train_y_ori']
-
-	print('X_train shape:', X_train.shape)  # (3709L, 50L, 1L)
-	print('y_train shape:', y_train.shape)  # (3709L,)
-	print('X_test shape:', X_test.shape)  # (412L, 50L, 1L)
-	print('y_test shape:', y_test.shape)  # (412L,)
-	print('test_x_ori shape:', test_x_ori.shape)  # (3709L, 50L, 1L)
-	print('test_y_ori shape:', test_y_ori.shape)  # (3709L,)
-	print('train_x_ori shape:', train_x_ori.shape)  # (412L, 50L, 1L)
-	print('train_y_ori shape:', train_y_ori.shape)  # (412L,)
-
-	return (X_train, y_train, X_test, y_test), (test_x_ori, test_y_ori, train_x_ori, train_y_ori)
-
-
 def data_save(file_name='',pos_range = 0.2):
-	stockCode = getData.get_szhl_code()
+	stockCode = getData.get_szhl_code()#上证红利成分股
 	(result, no_pos), (cls_train, pos_train) = getData.dataFrameToTrain(stockCode[0], seq_len = 100, pos_range = pos_range)
 	for i in range(1, len(stockCode)):
 		try:
@@ -76,7 +53,7 @@ def data_save(file_name='',pos_range = 0.2):
 			pos_train[ctr] = np.r_[pos_train[ctr], pos_train_T[ctr]]
 		result = np.r_[result, result_T]
 		no_pos = np.r_[no_pos, no_pos_T]
-	if train_model == 'cls':
+	if train_model == 'cls' and len(cls_train) > 0:
 		np.savez(file_name+'train_z.npz',
 				 train_x=cls_train['train_x'],
 				 train_y=cls_train['train_y'],
@@ -87,7 +64,7 @@ def data_save(file_name='',pos_range = 0.2):
 				 train_x_ori=cls_train['train_x_ori'],
 				 train_y_ori=cls_train['train_y_ori'],
 				 )
-	elif train_model == 'pos':
+	elif train_model == 'pos'and len(pos_train) > 0:
 		np.savez(file_name+'train_pos_z.npz',
 				 train_x=pos_train['train_x'],
 				 train_y=pos_train['train_y'],
@@ -106,12 +83,12 @@ def get_train_save(path, pos_range = 0.2):
 	file_name = path + 'pos_' + str(pos_range) + '_'  # pos_40_train_z.npz
 	(result, no_pos), (cls_train, pos_train) = data_save(file_name = file_name, pos_range = pos_range)
 	(X_train, y_train, X_test, y_test), (test_x_ori, test_y_ori, train_x_ori, train_y_ori) \
-		= map_to_train_cls(pos_train)
+		= map_to_train(pos_train)
 	return (X_train, y_train, X_test, y_test)
 
 #从文件加载数据
 def get_train_load(file_name):
 	pos_train = np.load(file_name)
 	(X_train, y_train, X_test, y_test), (test_x_ori, test_y_ori, train_x_ori, train_y_ori) \
-		= map_to_train_pos(pos_train)
+		= map_to_train(pos_train)
 	return (X_train, y_train, X_test, y_test)

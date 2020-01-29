@@ -1,5 +1,4 @@
-import torchPredict.dataProcess.DataPreProcess as getData
-import torchPredict.dataProcess.FeaturesGen
+import dataProcess.DataPreProcess as getData
 
 
 class RunPredict:

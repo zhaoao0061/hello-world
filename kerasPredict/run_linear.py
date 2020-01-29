@@ -11,7 +11,7 @@ import tensorflow as tf
 from keras import optimizers,losses
 import kerasPredict.Evaluate as ev
 
-# KTF.set_session(tf.Session(config=tf.ConfigProto(device_count={'cpu':0})))
+KTF.set_session(tf.Session(config=tf.ConfigProto(device_count={'cpu':0})))
 
 
 def mdsave(model,model_path,index_num,sum_epoch,pos_range):
@@ -41,7 +41,38 @@ def loadModel(model_path,index_n=1, epochs=2, pos_range=0.25):
    model.load_weights(model_path + model_name + '_weights.h5')
    return model,model_name
 
+def target_process(y_train):
+   i = 0
+   # 0: -0.4 到 0.3
+   # 1：上涨为1下跌为0  二分类
+   model = 1
+   if(model == 0):
+      for y in y_train:
+         if y > 0.3:
+            y_train[i] = 0.3
+         elif y >= 0.2:
+            y_train[i] = 0.2
+         elif y >= 0.1:
+            y_train[i] = 0.1
+         elif y <= 0.03:
+            y_train[i] = y - 0.04
+         i += 1
 
+   if(model == 1):
+      i = 1
+      tem = [0]* len(y_train)
+      for y in y_train:
+         if y_train[i - 1] == 0:
+            tem[i] = 1
+
+         if tem[i - 1] == 1:
+            tem[i] = 1
+
+         if y_train[i - 1] == 1:
+            tem[i] = 0
+         i += 1
+
+   return tem
 
 import dataProcess.FeaturesGen as FG
 
@@ -50,7 +81,9 @@ if __name__=='__main__':
    epochs = 17
    seq_len = 100
 
-   model_path = '../model_linear/'
+#模型存储加载地址
+   model_path_class = '../model_linear/double_class/'
+   model_path = model_path_class
    POS = 'pos'
    CLS = 'cls'
    train_mode = POS
@@ -58,46 +91,41 @@ if __name__=='__main__':
 
    print('> Loading data... ')
    #nor_result = result
-   path = '../dataProcess/data_file/'
+   data_path = '../dataProcess/data_file/'#数据存储地址
 
    pos_range = 0.2
    is_save = 0
    if is_save == 1:
-      (X_train, y_train, X_test, y_test) = FG.get_train_save(path, pos_range) #从互联网下载数据并预处理
+      (X_train, y_train, X_test, y_test) = FG.get_train_save(data_path, pos_range) #从互联网下载数据并预处理
    else:
       file_name = '../dataProcess/data_file/pos_0.2_train_pos_z.npz'
       (X_train, y_train, X_test, y_test) = FG.get_train_load(file_name = file_name)
    print('> Data Loaded. Compiling...')
 
    i = 0
-   for y in y_train:
-      if y > 0.3:
-         y_train[i] = 0.3
-      elif y >= 0.2:
-         y_train[i] = 0.2
-      elif y >= 0.1:
-         y_train[i] = 0.1
-      elif y <= 0.03:
-         y_train[i] = y - 0.04
-      i += 1
+   # for y in y_train:
+   #    if y > 0.3:
+   #       y_train[i] = 0.3
+   #    elif y >= 0.2:
+   #       y_train[i] = 0.2
+   #    elif y >= 0.1:
+   #       y_train[i] = 0.1
+   #    elif y <= 0.03:
+   #       y_train[i] = y - 0.04
+   #    i += 1
+   y_train = target_process(y_train)
 
    xcnn_train = np.reshape(X_train, [X_train.shape[0], 1, 100, 5])
    xcnn_test = np.reshape(X_test, [X_test.shape[0], 1, 100, 5])
 
    start = time.time()
-   input_nodes = X_train.shape[2]
-   if y_train.ndim == 1:
-      output_nodes = 1
-   else:
-      output_nodes = y_train.shape[1]
 
-
-   index_num = 1
-   sum_epoch = 114  #234
+   index_num = 129 #训练日期
+   sum_epoch = 1 #234
 
    #从之前训练的模型中加载
-   model_linear,model_name = loadModel(model_path,index_n=1, epochs = sum_epoch, pos_range=0.2)
-   # model_linear = lstm.share_model_linear()  #创建新模型
+   # model_linear,model_name = loadModel(model_path,index_n=1, epochs = sum_epoch, pos_range=0.2)
+   model_linear = lstm.share_model_linear()  #创建新模型
    model_linear.summary()
 
 
@@ -143,18 +171,18 @@ if __name__=='__main__':
 
          plt.rcParams['savefig.dpi'] = 300
          model_name = str(index_num) + '_' + str(sum_epoch) + '_pos_' + str(pos_range) + '_lstm_model'
-         figer_path = '../figer_result/'
+         figer_path = '../figer_result/double_class/'
          plt.savefig(figer_path + model_name + '.png', format='png', dpi=300)
          plt.close()
 
-         ##评估  计算查准率，下穿18
-         turn_error_value = ev.Turn_error(predict_ten, pos_target,8)
-         ev_save_text = '下穿8 turn_error: ' + str(turn_error_value)
-
-         up_turn_error_value = ev.up_Turn_error(predict_ten, pos_target,10)
-         ev_save_text = ev_save_text + '\n 上穿10 turn_error: ' + str(up_turn_error_value)
-
-         ev.save_result(ev_save_text, model_path = figer_path, index = index_num, epoch = sum_epoch)
+         # ##评估  计算查准率，下穿18
+         # turn_error_value = ev.Turn_error(predict_ten, pos_target,8)
+         # ev_save_text = '下穿8 turn_error: ' + str(turn_error_value)
+		 #
+         # up_turn_error_value = ev.up_Turn_error(predict_ten, pos_target,10)
+         # ev_save_text = ev_save_text + '\n 上穿10 turn_error: ' + str(up_turn_error_value)
+		 #
+         # ev.save_result(ev_save_text, model_path = figer_path, index = index_num, epoch = sum_epoch)
 
 
 

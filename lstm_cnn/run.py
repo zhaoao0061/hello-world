@@ -1,16 +1,11 @@
-import lstm_cnn.lstmTimeSeries as lstm
+import kerasPredict.model.lstmTimeSeries as lstm
 import time
 import matplotlib
 matplotlib.use('TkAgg')
-import math
 import matplotlib.pyplot as plt
 import numpy as np
-import tushare as ts
 import getStockData
 import lstm_cnn.tempcode as tpc
-import pandas as pd
-import os
-from keras.models import load_model
 import keras.backend.tensorflow_backend as KTF
 import tensorflow as tf
 from keras import optimizers,losses
